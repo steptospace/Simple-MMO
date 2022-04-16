@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"math/rand"
+	"time"
 )
 
 type Worker struct {
@@ -18,11 +19,12 @@ func (w *Worker) Close() error {
 	return db.Close()
 }
 
-type Account struct {
-	Login    string `json:"login" gorm:"primaryKey"`
-	Uid      int    `json:"uid" gorm:"primaryKey"`
-	Password string `json:"password"`
-	OnLine   bool   `json:"on_line"`
+type UserData struct {
+	Login     string        `json:"login" gorm:"primaryKey"`
+	Uid       int           `json:"uid" gorm:"primaryKey"`
+	Password  string        `json:"password"`
+	OnLine    bool          `json:"on_line"`
+	LoginTime time.Duration `json:"login_time"`
 }
 
 func Init(pgConfig string, logger zerolog.Logger) (*Worker, error) {
@@ -31,7 +33,7 @@ func Init(pgConfig string, logger zerolog.Logger) (*Worker, error) {
 		return nil, err
 	}
 
-	if err := db.AutoMigrate(Account{}); err != nil {
+	if err := db.AutoMigrate(UserData{}); err != nil {
 		return nil, err
 	}
 
@@ -41,13 +43,13 @@ func Init(pgConfig string, logger zerolog.Logger) (*Worker, error) {
 	}, nil
 }
 
-func (w *Worker) GetAccountData(login string, uid int) (acc Account, err error) {
+func (w *Worker) GetAccountData(login string, uid int) (acc UserData, err error) {
 	w.conn.Where("login = ?", login).Where("uid = ?", uid).Find(acc)
 	return acc, nil
 }
 
 func (w *Worker) InsertAccount(login string, password string) error {
-	data := Account{
+	data := UserData{
 		Login:    login,
 		Password: password,
 		Uid:      rand.Int(),
