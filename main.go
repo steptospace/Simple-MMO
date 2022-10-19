@@ -6,10 +6,11 @@ import (
 	"Simple-MMO/kafka"
 	"context"
 	"fmt"
-	"github.com/rs/zerolog"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/rs/zerolog"
 )
 
 func main() {
